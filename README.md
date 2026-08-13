@@ -1,6 +1,6 @@
 # Antigravity Chat Exporter
 
-A simple, automated Python script to export your local [Google Antigravity IDE](https://gemini.google.com) conversations directly into beautifully formatted Markdown files.
+A simple, automated Python script to export your local [Google Antigravity IDE](https://antigravity.google.com) conversations directly into beautifully formatted Markdown files.
 
 Since Antigravity stores conversation payloads in a binary Protobuf SQLite format that isn't easily human-readable, this script automatically locates the clean, internal `transcript_full.jsonl` files and parses them into standard Markdown.
 
@@ -17,27 +17,45 @@ Since Antigravity stores conversation payloads in a binary Protobuf SQLite forma
 
 ## Usage
 
-Run the script from your terminal:
+By default, the script exports the **currently active** Antigravity IDE conversation. Just run:
 
 ```bash
 python export_chat.py
 ```
 
-By default, the script looks for your currently active Antigravity chat ID and exports it to a folder named `exported conversations` inside the script's directory.
+Or if you've added the PowerShell profile shortcut (see below), simply:
 
-### Custom Arguments
+```powershell
+export "My Cool Name"
+```
 
-You can optionally pass a custom chat name, or a path to a specific `.db` file:
+The output is saved to an `exported conversations` folder inside the script's directory, automatically numbered (e.g., `001 - My Cool Name.md`, `002 - ...`).
+
+### Arguments
 
 ```bash
-# Provide a custom title for the exported Markdown file
-python export_chat.py "My Cool Project"
+# Export the active chat with a custom name
+python export_chat.py "My Cool Name"
 
-# Provide a specific Antigravity .db file path
+# Export a specific .db file
 python export_chat.py "C:\path\to\your\conversation.db"
 
-# Provide both
-python export_chat.py "My Cool Project" "C:\path\to\your\conversation.db"
+# Export a specific .db file with a custom name
+python export_chat.py "My Cool Name" "C:\path\to\your\conversation.db"
+```
+
+### PowerShell Shortcut (optional)
+
+To use the short `export "name"` command directly from your project root without typing `python export_chat.py`, add this function to your PowerShell profile (`$PROFILE`):
+
+```powershell
+function export { python "$pwd\export_chat.py" $args }
+```
+
+Then reload your terminal and run from your project root:
+
+```powershell
+export "My Cool Name"
 ```
 
 ## How it works
