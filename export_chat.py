@@ -17,7 +17,7 @@ def get_next_number(directory):
 def export_markdown(uuid, chat_name, output_dir):
     # Try to find the highly-readable transcript JSONL file automatically created by the IDE
     transcript_path = os.path.join(
-        r"c:\Users\mehda\.gemini\antigravity-ide\brain", 
+        os.path.expanduser(r"~\.gemini\antigravity-ide\brain"), 
         uuid, 
         r".system_generated\logs\transcript_full.jsonl"
     )
@@ -63,8 +63,19 @@ def export_markdown(uuid, chat_name, output_dir):
     print(f"Successfully exported Markdown chat to {output_file}")
     return True
 
+def get_latest_conversation(conversations_dir):
+    try:
+        db_files = [os.path.join(conversations_dir, f) for f in os.listdir(conversations_dir) if f.endswith('.db')]
+        if not db_files:
+            return None
+        return max(db_files, key=os.path.getmtime)
+    except Exception as e:
+        print(f"Error finding latest conversation: {e}")
+        return None
+
 if __name__ == "__main__":
-    db_path = r"c:\Users\mehda\.gemini\antigravity-ide\conversations\3525dec0-c365-413a-84d9-0af8f1286e91.db"
+    conversations_dir = os.path.expanduser(r"~\.gemini\antigravity-ide\conversations")
+    db_path = None
     
     if len(sys.argv) > 2:
         db_path = sys.argv[2]
@@ -75,11 +86,18 @@ if __name__ == "__main__":
             chat_name = os.path.splitext(os.path.basename(db_path))[0]
         else:
             chat_name = sys.argv[1]
+            db_path = get_latest_conversation(conversations_dir)
     else:
-        chat_name = os.path.splitext(os.path.basename(db_path))[0]
+        db_path = get_latest_conversation(conversations_dir)
+        chat_name = os.path.splitext(os.path.basename(db_path))[0] if db_path else "Unknown Chat"
+        
+    if not db_path or not os.path.exists(db_path):
+        print(f"Error: Could not determine a valid database path. Check if conversations exist in {conversations_dir}")
+        sys.exit(1)
         
     uuid = os.path.splitext(os.path.basename(db_path))[0]
-    output_dir = r"c:\Projects\Badiil\ignore\exported conversations"
+    output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exported-conversations")
     os.makedirs(output_dir, exist_ok=True)
     
     export_markdown(uuid, chat_name, output_dir)
+
